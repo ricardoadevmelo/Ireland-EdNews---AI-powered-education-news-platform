@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import PlaceholderImage from './PlaceholderImage';
 
 // Extend window interface for gtag
 declare global {
@@ -67,12 +67,11 @@ const AffiliateCard: React.FC<AffiliateCardProps> = ({ affiliate }) => {
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
       <div className="relative">
-        <Image 
-          src={affiliate.imageUrl} 
-          alt={affiliate.title}
+        <PlaceholderImage 
           width={300}
           height={200}
-          className="w-full h-48 object-cover"
+          text={affiliate.title}
+          className="w-full h-48 rounded-t-lg"
         />
         <div className="absolute top-2 left-2">
           {getProviderBadge(affiliate.provider)}
@@ -133,45 +132,59 @@ const AffiliateCard: React.FC<AffiliateCardProps> = ({ affiliate }) => {
   );
 };
 
-// Sample affiliate data
+// Sample affiliate data - IRISH EDUCATION FOCUSED
 const sampleAffiliates: AffiliateLink[] = [
   {
-    id: 'book-irish-education',
-    title: 'Complete Guide to Irish Education System',
-    description: 'Comprehensive guide covering Trinity College Dublin, UCD, Cork University, and application processes.',
-    price: '29.99',
-    originalPrice: '39.99',
-    discount: '25%',
+    id: 'irish-education-guide',
+    title: 'Complete Guide to Studying in Ireland 2025',
+    description: 'Ultimate guide covering Trinity College Dublin, UCD, DCU, and all major Irish universities. Visa process, accommodation, and scholarship opportunities.',
+    price: '24.99',
+    originalPrice: '34.99',
+    discount: '29%',
     rating: 5,
-    reviewCount: 127,
+    reviewCount: 89,
     imageUrl: '/images/irish-education-book.jpg',
-    affiliateUrl: 'https://amazon.com/dp/XXXXXXXX?tag=ireland-ednews-20',
+    affiliateUrl: 'https://amazon.com/dp/studying-ireland-2025?tag=ireland-ednews-20',
     provider: 'amazon',
     category: 'books',
   },
   {
-    id: 'course-study-ireland',
-    title: 'How to Study in Ireland: Complete Course',
-    description: 'Step-by-step course covering visa applications, university selection, and scholarship opportunities.',
-    price: '89.99',
-    originalPrice: '149.99',
+    id: 'trinity-prep-course',
+    title: 'Trinity College Dublin Application Masterclass',
+    description: 'Expert-led course covering TCD application process, interview preparation, and scholarship strategies. 90% acceptance rate for students.',
+    price: '149.99',
+    originalPrice: '249.99',
     discount: '40%',
-    rating: 4,
-    reviewCount: 892,
-    imageUrl: '/images/study-ireland-course.jpg',
-    affiliateUrl: 'https://coursera.org/learn/study-ireland?partnerId=ireland-ednews',
+    rating: 5,
+    reviewCount: 156,
+    imageUrl: '/images/trinity-course.jpg',
+    affiliateUrl: 'https://coursera.org/learn/trinity-college-prep?partnerId=ireland-ednews',
     provider: 'coursera',
     category: 'courses',
   },
   {
-    id: 'trinity-masters-program',
-    title: 'Trinity College Dublin - Masters in Computer Science',
-    description: 'World-class masters program in computer science at Ireland\'s top university.',
-    price: '12500',
+    id: 'irish-tech-bootcamp',
+    title: 'Irish Tech Industry Career Path',
+    description: 'Learn from Dublin tech leaders. Covers major employers like Google Dublin, Facebook, Microsoft, and Irish startups. Job placement assistance.',
+    price: '89.99',
+    originalPrice: '129.99',
+    discount: '31%',
+    rating: 4,
+    reviewCount: 203,
+    imageUrl: '/images/irish-tech-course.jpg',
+    affiliateUrl: 'https://udemy.com/irish-tech-career?ref=ireland-ednews',
+    provider: 'udemy',
+    category: 'courses',
+  },
+  {
+    id: 'ucd-masters-program',
+    title: 'UCD Masters in Data Science & Analytics',
+    description: 'One of Europe\'s top data science programs. Located in Dublin with strong industry connections. Graduate visa opportunities available.',
+    price: '15000',
     rating: 5,
-    reviewCount: 45,
-    imageUrl: '/images/trinity-college.jpg',
-    affiliateUrl: 'https://tcd.ie/courses/masters-cs?ref=ireland-ednews',
+    reviewCount: 67,
+    imageUrl: '/images/ucd-masters.jpg',
+    affiliateUrl: 'https://ucd.ie/courses/masters-data-science?ref=ireland-ednews',
     provider: 'university',
     category: 'programs',
   },
@@ -197,11 +210,11 @@ const AffiliateShowcase: React.FC<AffiliateShowcaseProps> = ({
       <div className="container mx-auto px-6">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            🎓 Recursos Recomendados para Educação na Irlanda
+            🎓 Recursos Recomendados para Estudar na Irlanda
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Produtos e cursos cuidadosamente selecionados para ajudar você a ter sucesso 
-            no sistema educacional irlandês. Ao comprar através dos nossos links, você apoia o Ireland EdNews.
+            Cursos, livros e programas cuidadosamente selecionados para ajudá-lo a ter sucesso 
+            nas melhores universidades irlandesas. Trinity College Dublin, UCD, DCU e mais.
           </p>
         </div>
         

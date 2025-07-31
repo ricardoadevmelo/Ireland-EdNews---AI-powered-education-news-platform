@@ -4,6 +4,7 @@ import LegalDisclaimer from './components/LegalDisclaimer';
 import AffiliateShowcase from './components/AffiliateShowcase';
 import NewsletterPremium from './components/NewsletterPremium';
 import JobBoard from './components/JobBoard';
+import AutomatedContentFeed from './components/AutomatedContentFeed';
 
 export default function HomePage() {
   const [stats, setStats] = useState({ subscribers: 0, articles: 0, views: 0 });
@@ -145,6 +146,25 @@ export default function HomePage() {
                 Informações verificadas de universidades, institutos e órgãos oficiais de educação da Irlanda.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Automated Content Feed Section */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-emerald-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+              🤖 Conteúdo Atualizado Automaticamente
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Nossa IA monitora continuamente as principais fontes de educação irlandesa, 
+              trazendo as últimas notícias e tendências diretamente para você.
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <AutomatedContentFeed />
           </div>
         </div>
       </section>

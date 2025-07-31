@@ -7,7 +7,6 @@ import GoogleAnalytics from './components/GoogleAnalytics';
 import GoogleAdSense from './components/GoogleAdSense';
 import GoogleSearchConsole from './components/GoogleSearchConsole';
 import StructuredData from './components/StructuredData';
-import { generateSEOMetadata } from './lib/seo';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,6 +14,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://ireland-ednews-ricardo.vercel.app'),
   title: "Ireland EdNews - Educação e Aprendizagem Online",
   description: "Portal de notícias focado em educação e aprendizagem online na Irlanda. Conteúdo inteligente com IA.",
   keywords: "educação irlanda, universidades irlandesas, cursos online, estudar na irlanda, educação superior, trinity college dublin, ucd, cork university",
@@ -26,11 +26,20 @@ export const metadata: Metadata = {
     siteName: "Ireland EdNews",
     locale: "pt_BR",
     type: "website",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Ireland EdNews - Educação na Irlanda",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Ireland EdNews",
     description: "Notícias educacionais da Irlanda com IA",
+    images: ["/images/twitter-image.jpg"],
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || "add-your-google-verification-code",
@@ -75,6 +84,12 @@ export default function RootLayout({
                 </Link>
                 <Link href="/news" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
                   Notícias
+                </Link>
+                <Link href="/search" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
+                  Busca Avançada
+                </Link>
+                <Link href="/dashboard" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
+                  Dashboard
                 </Link>
                 <a href="/api/rss" className="text-gray-700 hover:text-emerald-600 font-medium transition-colors">
                   RSS Feed
