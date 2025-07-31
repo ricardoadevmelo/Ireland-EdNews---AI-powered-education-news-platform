@@ -1,4 +1,0 @@
-google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
-# Este arquivo ads.txt será atualizado automaticamente quando o AdSense for aprovado
-# Ireland EdNews - https://ireland-ednews-ricardo.vercel.app
-# Criado em: 31 de julho de 2025

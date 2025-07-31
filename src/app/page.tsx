@@ -1,278 +1,261 @@
-"use client";
-import { useState, useEffect } from 'react';
-import LegalDisclaimer from './components/LegalDisclaimer';
-import AffiliateShowcase from './components/AffiliateShowcase';
-import NewsletterPremium from './components/NewsletterPremium';
-import JobBoard from './components/JobBoard';
-import AutomatedContentFeed from './components/AutomatedContentFeed';
+'use client';
 
-export default function HomePage() {
-  const [stats, setStats] = useState({ subscribers: 0, articles: 0, views: 0 });
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+
+interface Article {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  image?: string;
+  publishedAt: string;
+  source: string;
+  category: string;
+  tags: string[];
+}
+
+export default function Home() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
 
   useEffect(() => {
-    // Simulate real stats
-    setStats({
-      subscribers: Math.floor(Math.random() * 500) + 150,
-      articles: Math.floor(Math.random() * 50) + 25,
-      views: Math.floor(Math.random() * 5000) + 2000
-    });
+    fetchArticles();
   }, []);
 
-  const handleNewsletterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-    
+  const fetchArticles = async () => {
     try {
-      const response = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      });
-      
-      if (response.ok) {
-        setIsSubscribed(true);
-        setEmail('');
-      }
+      const response = await fetch('/api/automated-content');
+      const data = await response.json();
+      setArticles(data.articles || []);
     } catch (error) {
-      console.error('Erro ao inscrever:', error);
+      console.error('Error fetching articles:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNewsletterSignup = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      setSubscribed(true);
+      setTimeout(() => {
+        setSubscribed(false);
+        setEmail('');
+      }, 3000);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-orange-50">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white">
-        <div className="absolute inset-0 bg-gradient-to-r from-emerald-800/20 to-teal-800/20"></div>
-        <div className="relative container mx-auto px-6 py-20">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="mb-6">
-              <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm border border-white/30">
-                🇮🇪 Educação na Irlanda
+      <section className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Seu Portal de Notícias
+              <br />
+              <span className="bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                sobre a Irlanda
               </span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Ireland <span className="text-orange-300">EdNews</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-emerald-100 leading-relaxed">
-              Sua fonte confiável para notícias educacionais da Irlanda.<br />
-              Conteúdo inteligente, resumos automatizados e insights únicos.
+            <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto">
+              Mantenha-se atualizado com as últimas notícias sobre educação, vistos, universidades e oportunidades na Irlanda.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <a href="/news" className="inline-flex items-center px-8 py-4 bg-white text-emerald-600 font-semibold rounded-xl hover:bg-emerald-50 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                </svg>
-                Explorar Notícias
-              </a>
-              <a href="/api/rss" className="inline-flex items-center px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-xl hover:bg-white hover:text-emerald-600 transition-all duration-300">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3.429 2.776c8.712 0 15.794 7.082 15.794 15.794H15.57c0-6.258-5.072-11.33-11.33-11.33V2.776zm0 4.547c5.838 0 10.577 4.74 10.577 10.577h-3.653c0-3.834-3.09-6.924-6.924-6.924V7.323zm1.946 6.924a1.946 1.946 0 11-3.892 0 1.946 1.946 0 013.892 0z"/>
-                </svg>
-                Feed RSS
-              </a>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link 
+                href="#articles" 
+                className="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-all duration-300 hover:scale-105"
+              >
+                Ver Notícias
+              </Link>
+              <Link 
+                href="#newsletter" 
+                className="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-blue-600 transition-all duration-300"
+              >
+                Assinar Newsletter
+              </Link>
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white/10 to-transparent"></div>
       </section>
 
       {/* Stats Section */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 border border-emerald-200">
-              <div className="text-4xl font-bold text-emerald-600 mb-2">{stats.subscribers}+</div>
-              <div className="text-emerald-700 font-medium">Assinantes Ativos</div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="p-6">
+              <div className="text-4xl font-bold text-blue-600 mb-2">1000+</div>
+              <div className="text-gray-600">Artigos Publicados</div>
             </div>
-            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200">
-              <div className="text-4xl font-bold text-blue-600 mb-2">{stats.articles}+</div>
-              <div className="text-blue-700 font-medium">Artigos Publicados</div>
+            <div className="p-6">
+              <div className="text-4xl font-bold text-purple-600 mb-2">50K+</div>
+              <div className="text-gray-600">Leitores Mensais</div>
             </div>
-            <div className="text-center p-6 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200">
-              <div className="text-4xl font-bold text-orange-600 mb-2">{stats.views}+</div>
-              <div className="text-orange-700 font-medium">Visualizações Mensais</div>
+            <div className="p-6">
+              <div className="text-4xl font-bold text-green-600 mb-2">24/7</div>
+              <div className="text-gray-600">Atualizações</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-emerald-50">
-        <div className="container mx-auto px-6">
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Por que escolher o Ireland EdNews?
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Tecnologia avançada combinada com curadoria especializada para trazer o melhor da educação irlandesa.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">Inteligência Artificial</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Resumos automatizados e análises inteligentes de notícias educacionais usando tecnologia Gemini AI avançada.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">Atualizações Diárias</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Conteúdo novo todos os dias com automação completa para manter você sempre informado sobre educação na Irlanda.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-4">Fontes Confiáveis</h3>
-              <p className="text-gray-600 leading-relaxed">
-                Informações verificadas de universidades, institutos e órgãos oficiais de educação da Irlanda.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Automated Content Feed Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-emerald-50">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              🤖 Conteúdo Atualizado Automaticamente
-            </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Nossa IA monitora continuamente as principais fontes de educação irlandesa, 
-              trazendo as últimas notícias e tendências diretamente para você.
+              Oferecemos as informações mais atualizadas e relevantes sobre educação e vida na Irlanda.
             </p>
           </div>
           
-          <div className="max-w-4xl mx-auto">
-            <AutomatedContentFeed />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Educação Atualizada</h3>
+              <p className="text-gray-600">
+                Últimas informações sobre universidades, cursos e oportunidades educacionais na Irlanda.
+              </p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Vistos & Imigração</h3>
+              <p className="text-gray-600">
+                Guias completos sobre processos de visto, documentação e imigração para a Irlanda.
+              </p>
+            </div>
+            
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">Notícias em Tempo Real</h3>
+              <p className="text-gray-600">
+                Atualizações instantâneas sobre mudanças nas políticas e novas oportunidades.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Affiliate Products Section */}
-      <AffiliateShowcase limit={3} />
-
-      {/* Job Board Section */}
-      <JobBoard featured limit={2} />
-
-      {/* Premium Newsletter Section */}
-      <NewsletterPremium />
+      {/* Latest Articles */}
+      <section id="articles" className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Últimas Notícias
+            </h2>
+            <p className="text-xl text-gray-600">
+              Fique por dentro das principais novidades sobre a Irlanda
+            </p>
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Carregando notícias...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {articles.slice(0, 6).map((article) => (
+                <article key={article.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                  {article.image && (
+                    <img 
+                      src={article.image} 
+                      alt={article.title}
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
+                  <div className="p-6">
+                    <div className="flex items-center mb-3">
+                      <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                        {article.category}
+                      </span>
+                      <span className="text-gray-500 text-sm ml-3">
+                        {new Date(article.publishedAt).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">
+                      {article.title}
+                    </h3>
+                    <p className="text-gray-600 mb-4 line-clamp-3">
+                      {article.description}
+                    </p>
+                    <Link 
+                      href={article.url}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Ler mais →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+          
+          <div className="text-center mt-12">
+            <Link 
+              href="/search"
+              className="bg-blue-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-blue-700 transition-colors duration-300"
+            >
+              Ver Todas as Notícias
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Newsletter Section */}
-      <section className="py-20 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-6">
-              Receba as melhores notícias educacionais
-            </h2>
-            <p className="text-xl mb-8 text-emerald-100">
-              Assine nossa newsletter e receba resumos semanais das principais novidades em educação na Irlanda.
-            </p>
-            
-            <LegalDisclaimer />
-            
-            {!isSubscribed ? (
-              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Seu melhor email"
-                  className="flex-1 px-6 py-4 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-white/30"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="px-8 py-4 bg-white text-emerald-600 font-semibold rounded-xl hover:bg-emerald-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
-                >
-                  Assinar Grátis
-                </button>
-              </form>
-            ) : (
-              <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-8 max-w-md mx-auto">
-                <svg className="w-16 h-16 text-white mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 className="text-2xl font-bold mb-2">Inscrição Confirmada!</h3>
-                <p className="text-emerald-100">Obrigado por se juntar à nossa comunidade educacional.</p>
-              </div>
-            )}
-          </div>
+      <section id="newsletter" className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Receba as últimas notícias
+          </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            Assine nossa newsletter e seja o primeiro a saber sobre novas oportunidades na Irlanda
+          </p>
+          
+          {subscribed ? (
+            <div className="bg-green-500 text-white p-4 rounded-lg inline-block">
+              ✓ Obrigado! Você foi inscrito com sucesso.
+            </div>
+          ) : (
+            <form onSubmit={handleNewsletterSignup} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Seu email"
+                className="flex-1 px-6 py-4 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold hover:bg-blue-50 transition-colors duration-300"
+              >
+                Assinar
+              </button>
+            </form>
+          )}
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="col-span-1 md:col-span-2">
-              <h3 className="text-2xl font-bold mb-4 text-emerald-400">Ireland EdNews</h3>
-              <p className="text-gray-300 mb-6 leading-relaxed">
-                Plataforma dedicada a trazer as melhores notícias e insights sobre educação na Irlanda. 
-                Tecnologia avançada para informação de qualidade.
-              </p>
-              <div className="flex space-x-4">
-                <a href="mailto:contato@ireland-ednews.com" className="text-gray-400 hover:text-emerald-400 transition-colors">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                  </svg>
-                </a>
-                <a href="/api/rss" className="text-gray-400 hover:text-orange-400 transition-colors">
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3.429 2.776c8.712 0 15.794 7.082 15.794 15.794H15.57c0-6.258-5.072-11.33-11.33-11.33V2.776zm0 4.547c5.838 0 10.577 4.74 10.577 10.577h-3.653c0-3.834-3.09-6.924-6.924-6.924V7.323zm1.946 6.924a1.946 1.946 0 11-3.892 0 1.946 1.946 0 013.892 0z"/>
-                  </svg>
-                </a>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4 text-emerald-400">Navegação</h4>
-              <ul className="space-y-2">
-                <li><a href="/news" className="text-gray-300 hover:text-white transition-colors">Notícias</a></li>
-                <li><a href="/api/content" className="text-gray-300 hover:text-white transition-colors">API Content</a></li>
-                <li><a href="/api/rss" className="text-gray-300 hover:text-white transition-colors">Feed RSS</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-lg font-semibold mb-4 text-emerald-400">Legal</h4>
-              <ul className="space-y-2">
-                <li><a href="/privacy" className="text-gray-300 hover:text-white transition-colors">Privacidade</a></li>
-                <li><a href="/terms" className="text-gray-300 hover:text-white transition-colors">Termos de Uso</a></li>
-                <li><a href="mailto:legal@ireland-ednews.com" className="text-gray-300 hover:text-white transition-colors">Contato Legal</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center">
-            <p className="text-gray-400">
-              © 2025 Ireland EdNews. Desenvolvido com tecnologia avançada para educação. 
-              Todo conteúdo é gerado automaticamente respeitando direitos autorais.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

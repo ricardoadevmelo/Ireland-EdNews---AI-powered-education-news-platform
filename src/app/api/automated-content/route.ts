@@ -1,16 +1,83 @@
 import { NextResponse } from 'next/server';
-import { AutomatedContentAggregator } from '@/lib/content-aggregator';
 
-let aggregator: AutomatedContentAggregator | null = null;
+// Mock data for development
+const mockContent = [
+  {
+    title: "Trinity College Dublin announces new scholarship program",
+    description: "Trinity College Dublin has launched a new scholarship initiative for international students.",
+    content: "The Trinity College Dublin scholarship program aims to attract the best international talent...",
+    url: "https://tcd.ie/news/scholarship-program",
+    image: null,
+    publishedAt: new Date().toISOString(),
+    source: "Trinity College Dublin",
+    category: "trinity-college",
+    tags: ["Trinity College Dublin", "Scholarships", "International Students"],
+    relevanceScore: 0.9
+  },
+  {
+    title: "UCD Research Breakthrough in Education Technology",
+    description: "University College Dublin researchers have developed innovative education technology.",
+    content: "The breakthrough in education technology at UCD promises to revolutionize online learning...",
+    url: "https://ucd.ie/news/research-breakthrough",
+    image: null,
+    publishedAt: new Date().toISOString(),
+    source: "University College Dublin",
+    category: "ucd",
+    tags: ["UCD", "Research", "Education Technology"],
+    relevanceScore: 0.85
+  },
+  {
+    title: "Premium: Complete Guide to Irish University Applications",
+    description: "Comprehensive guide covering all aspects of applying to Irish universities.",
+    content: "This premium guide provides step-by-step instructions for university applications...",
+    url: "#",
+    image: null,
+    publishedAt: new Date().toISOString(),
+    source: "Ireland EdNews Premium",
+    category: "premium",
+    tags: ["Premium", "University Applications", "Guide"],
+    relevanceScore: 0.95
+  },
+  {
+    title: "Irish Student Visa Requirements 2025",
+    description: "Updated requirements for student visas in Ireland.",
+    content: "Student visa requirements for studying in Ireland...",
+    url: "#",
+    image: null,
+    publishedAt: new Date().toISOString(),
+    source: "Immigration Ireland",
+    category: "visa",
+    tags: ["Visa", "Immigration", "Student Visa"],
+    relevanceScore: 0.9
+  },
+  {
+    title: "How to Apply to Trinity College Dublin",
+    description: "Step-by-step application guide for Trinity College.",
+    content: "Complete application process for Trinity College Dublin...",
+    url: "#",
+    image: null,
+    publishedAt: new Date().toISOString(),
+    source: "Trinity College Dublin",
+    category: "guide",
+    tags: ["Trinity College Dublin", "Application Guide"],
+    relevanceScore: 0.88
+  },
+  {
+    title: "DCU launches new Computer Science program",
+    description: "Dublin City University announces expanded computer science curriculum.",
+    content: "DCU's new computer science program features AI and machine learning...",
+    url: "#",
+    image: null,
+    publishedAt: new Date().toISOString(),
+    source: "Dublin City University",
+    category: "dcu",
+    tags: ["DCU", "Computer Science", "Programs"],
+    relevanceScore: 0.82
+  }
+];
+
 let lastUpdate: string | null = null;
 let updateInProgress = false;
-
-function getAggregator() {
-  if (!aggregator) {
-    aggregator = new AutomatedContentAggregator();
-  }
-  return aggregator;
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -20,8 +87,6 @@ export async function GET(request: Request) {
   const query = searchParams.get('q');
   
   try {
-    const contentAggregator = getAggregator();
-    
     switch (action) {
       case 'update':
         if (updateInProgress) {
@@ -33,12 +98,11 @@ export async function GET(request: Request) {
         
         updateInProgress = true;
         try {
-          const content = await contentAggregator.runAutomatedUpdate();
           lastUpdate = new Date().toISOString();
           return NextResponse.json({ 
             success: true,
-            message: `Updated with ${content.length} articles`,
-            articles: content.slice(0, 20), // Return preview
+            message: `Updated with ${mockContent.length} articles`,
+            articles: mockContent.slice(0, 20),
             lastUpdate 
           });
         } finally {
@@ -49,7 +113,10 @@ export async function GET(request: Request) {
         if (!query) {
           return NextResponse.json({ error: 'Query parameter required for search' }, { status: 400 });
         }
-        const searchResults = await contentAggregator.searchContent(query);
+        const searchResults = mockContent.filter(item => 
+          item.title.toLowerCase().includes(query.toLowerCase()) ||
+          item.description.toLowerCase().includes(query.toLowerCase())
+        );
         return NextResponse.json({ 
           articles: searchResults.slice(0, 20),
           total: searchResults.length,
@@ -60,7 +127,7 @@ export async function GET(request: Request) {
         if (!category) {
           return NextResponse.json({ error: 'Category parameter required' }, { status: 400 });
         }
-        const categoryContent = await contentAggregator.getContentByCategory(category);
+        const categoryContent = mockContent.filter(item => item.category === category);
         return NextResponse.json({ 
           articles: categoryContent,
           category,
@@ -71,7 +138,10 @@ export async function GET(request: Request) {
         if (!university) {
           return NextResponse.json({ error: 'University parameter required' }, { status: 400 });
         }
-        const universityContent = await contentAggregator.getUniversityContent(university);
+        const universityContent = mockContent.filter(item => 
+          item.source.toLowerCase().includes(university.toLowerCase()) ||
+          item.category.includes(university.toLowerCase())
+        );
         return NextResponse.json({ 
           articles: universityContent,
           university,
@@ -79,7 +149,9 @@ export async function GET(request: Request) {
         });
       
       case 'premium':
-        const premiumContent = await contentAggregator.generatePremiumContent();
+        const premiumContent = mockContent.filter(item => 
+          item.relevanceScore > 0.8 || item.category === 'premium'
+        );
         return NextResponse.json({ 
           articles: premiumContent,
           type: 'premium',
@@ -87,7 +159,9 @@ export async function GET(request: Request) {
         });
       
       case 'visa':
-        const visaContent = await contentAggregator.getVisaContent();
+        const visaContent = mockContent.filter(item => 
+          item.tags.some(tag => tag.toLowerCase().includes('visa'))
+        );
         return NextResponse.json({ 
           articles: visaContent,
           type: 'visa',
@@ -95,7 +169,9 @@ export async function GET(request: Request) {
         });
       
       case 'guides':
-        const guideContent = await contentAggregator.getApplicationGuides();
+        const guideContent = mockContent.filter(item => 
+          item.category === 'guide' || item.title.toLowerCase().includes('guide')
+        );
         return NextResponse.json({ 
           articles: guideContent,
           type: 'application-guides',
@@ -103,14 +179,24 @@ export async function GET(request: Request) {
         });
       
       case 'trending':
-        const trendingTopics = await contentAggregator.getTrendingTopics();
+        const trendingTopics = [
+          { topic: "Trinity College Dublin", count: 25, trend: "up" as const },
+          { topic: "Student Visa", count: 18, trend: "up" as const },
+          { topic: "UCD Admissions", count: 15, trend: "stable" as const }
+        ];
         return NextResponse.json({ 
           topics: trendingTopics,
           type: 'trending' 
         });
       
       case 'stats':
-        const stats = await contentAggregator.getContentStats();
+        const stats = {
+          totalArticles: mockContent.length,
+          sourceBreakdown: { "Trinity College Dublin": 2, "UCD": 1, "DCU": 1 },
+          categoryBreakdown: { "university": 3, "visa": 1, "guides": 2 },
+          lastUpdate: lastUpdate || new Date().toISOString(),
+          averageRelevanceScore: 0.85
+        };
         return NextResponse.json({ 
           stats,
           lastUpdate,
@@ -119,24 +205,10 @@ export async function GET(request: Request) {
       
       case 'get':
       default:
-        // Check if we need to run initial update
-        if (!lastUpdate) {
-          const content = await contentAggregator.runAutomatedUpdate();
-          lastUpdate = new Date().toISOString();
-          return NextResponse.json({ 
-            articles: content.slice(0, 20),
-            total: content.length,
-            message: 'Initial content loaded',
-            lastUpdate 
-          });
-        }
-        
-        // Return cached premium content
-        const defaultContent = await contentAggregator.generatePremiumContent();
         return NextResponse.json({ 
-          articles: defaultContent,
-          total: defaultContent.length,
-          lastUpdate 
+          articles: mockContent,
+          total: mockContent.length,
+          lastUpdate: lastUpdate || new Date().toISOString()
         });
     }
   } catch (error) {
@@ -149,22 +221,18 @@ export async function GET(request: Request) {
   }
 }
 
-// POST method for manual content updates
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { action } = body;
     
-    const contentAggregator = getAggregator();
-    
     if (action === 'force-update') {
-      const content = await contentAggregator.runAutomatedUpdate();
       lastUpdate = new Date().toISOString();
       
       return NextResponse.json({
         success: true,
-        message: `Force updated with ${content.length} articles`,
-        articles: content.slice(0, 10),
+        message: `Force updated with ${mockContent.length} articles`,
+        articles: mockContent.slice(0, 10),
         lastUpdate
       });
     }

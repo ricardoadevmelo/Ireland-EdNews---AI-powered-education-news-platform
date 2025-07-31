@@ -2,20 +2,8 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { AutomatedContentAggregator } from '@/lib/content-aggregator';
 
 const contentDirectory = path.join(process.cwd(), 'src/content');
-
-let aggregator: AutomatedContentAggregator | null = null;
-let lastUpdate: string | null = null;
-let updateInProgress = false;
-
-function getAggregator() {
-  if (!aggregator) {
-    aggregator = new AutomatedContentAggregator();
-  }
-  return aggregator;
-}
 
 interface ArticleMetadata {
   title: string;

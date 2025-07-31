@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server';
-import { AutomatedContentAggregator } from '@/lib/content-aggregator';
-import { ScrapedContent } from '@/lib/content-scraper';
 
 interface SearchFilters {
   category?: string;
@@ -9,6 +7,19 @@ interface SearchFilters {
   source?: string;
   relevanceMin?: number;
   contentType?: 'article' | 'guide' | 'news' | 'premium';
+}
+
+interface ScrapedContent {
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  image?: string;
+  publishedAt: string;
+  source: string;
+  category: string;
+  tags: string[];
+  relevanceScore: number;
 }
 
 interface SearchResult {
@@ -25,14 +36,69 @@ interface SearchResult {
   };
 }
 
-let aggregator: AutomatedContentAggregator | null = null;
-
-function getAggregator() {
-  if (!aggregator) {
-    aggregator = new AutomatedContentAggregator();
+// Mock search data
+const mockSearchData: ScrapedContent[] = [
+  {
+    title: "Trinity College Dublin Scholarship Program 2025",
+    description: "New scholarship opportunities for international students at Trinity College Dublin.",
+    content: "Trinity College Dublin is pleased to announce new scholarship opportunities...",
+    url: "https://tcd.ie/scholarships",
+    image: undefined,
+    publishedAt: "2025-01-15T10:00:00Z",
+    source: "Trinity College Dublin",
+    category: "scholarships",
+    tags: ["Trinity College Dublin", "Scholarships", "International Students"],
+    relevanceScore: 0.95
+  },
+  {
+    title: "UCD Admissions Process Guide",
+    description: "Complete guide to applying to University College Dublin.",
+    content: "University College Dublin admissions process includes...",
+    url: "https://ucd.ie/admissions",
+    image: undefined,
+    publishedAt: "2025-01-10T14:30:00Z",
+    source: "University College Dublin",
+    category: "admissions",
+    tags: ["UCD", "Admissions", "Application Guide"],
+    relevanceScore: 0.88
+  },
+  {
+    title: "Irish Student Visa Requirements Update",
+    description: "Latest updates on student visa requirements for Ireland.",
+    content: "The Irish immigration authority has updated student visa requirements...",
+    url: "https://inis.gov.ie/student-visas",
+    image: undefined,
+    publishedAt: "2025-01-08T09:15:00Z",
+    source: "Irish Immigration Service",
+    category: "visa",
+    tags: ["Student Visa", "Immigration", "Requirements"],
+    relevanceScore: 0.92
+  },
+  {
+    title: "Dublin City University New Programs 2025",
+    description: "DCU announces new undergraduate and postgraduate programs.",
+    content: "Dublin City University has introduced several new programs...",
+    url: "https://dcu.ie/new-programs",
+    image: undefined,
+    publishedAt: "2025-01-05T11:45:00Z",
+    source: "Dublin City University",
+    category: "programs",
+    tags: ["DCU", "New Programs", "Undergraduate", "Postgraduate"],
+    relevanceScore: 0.85
+  },
+  {
+    title: "Cork University Research Excellence",
+    description: "University College Cork leads in research innovation.",
+    content: "University College Cork continues to excel in research...",
+    url: "https://ucc.ie/research",
+    image: undefined,
+    publishedAt: "2025-01-03T16:20:00Z",
+    source: "University College Cork",
+    category: "research",
+    tags: ["UCC", "Research", "Innovation"],
+    relevanceScore: 0.80
   }
-  return aggregator;
-}
+];
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -56,12 +122,14 @@ export async function GET(request: Request) {
   };
 
   try {
-    const contentAggregator = getAggregator();
-    
     // Get base search results
     let results = query ? 
-      await contentAggregator.searchContent(query) :
-      await contentAggregator.generatePremiumContent();
+      mockSearchData.filter(item => 
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.description.toLowerCase().includes(query.toLowerCase()) ||
+        item.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+      ) :
+      mockSearchData;
 
     // Apply filters
     results = applyFilters(results, filters);

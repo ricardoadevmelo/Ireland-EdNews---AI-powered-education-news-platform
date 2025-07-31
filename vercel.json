@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/content",
+      "schedule": "0 */4 * * *"
+    }
+  ],
   "functions": {
     "src/app/api/content/route.ts": {
       "maxDuration": 30
@@ -13,19 +19,27 @@
       "maxDuration": 30
     },
     "src/app/api/automated-content/route.ts": {
-      "maxDuration": 60
-    },
-    "src/app/api/search/route.ts": {
+      "memory": 1024,
       "maxDuration": 30
     },
+    "src/app/api/search/route.ts": {
+      "memory": 512,
+      "maxDuration": 15
+    },
     "src/app/api/cron/content/route.ts": {
-      "maxDuration": 300
+      "memory": 1024,
+      "maxDuration": 60
     }
   },
-  "crons": [
+  "headers": [
     {
-      "path": "/api/cron/content",
-      "schedule": "0 */1 * * *"
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=300, stale-while-revalidate"
+        }
+      ]
     }
   ]
 }
