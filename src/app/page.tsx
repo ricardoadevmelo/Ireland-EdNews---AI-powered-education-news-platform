@@ -3,9 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-// Maintenance mode check
-const MAINTENANCE_MODE = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
-
 interface Article {
   id: string;
   title: string;
@@ -20,8 +17,35 @@ interface Article {
 }
 
 export default function Home() {
-  // Show maintenance page if enabled
-  if (MAINTENANCE_MODE) {
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  const [maintenanceLoading, setMaintenanceLoading] = useState(true);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
+  useEffect(() => {
+    // Check maintenance mode on client side
+    const maintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
+    setIsMaintenanceMode(maintenanceMode);
+    setMaintenanceLoading(false);
+    
+    // If not in maintenance mode, fetch articles
+    if (!maintenanceMode) {
+      fetchArticles();
+    }
+  }, []);
+
+  // Show loading first, then maintenance page if enabled
+  if (maintenanceLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-emerald-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (isMaintenanceMode) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 flex items-center justify-center px-4">
         <div className="text-center text-white max-w-md">
@@ -52,15 +76,6 @@ export default function Home() {
       </div>
     );
   }
-
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-
-  useEffect(() => {
-    fetchArticles();
-  }, []);
 
   const fetchArticles = async () => {
     try {
