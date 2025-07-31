@@ -1,0 +1,177 @@
+name: Daily Content Generation
+
+on:
+  schedule:
+    # Runs daily at 7:00 AM UTC
+    - cron: '0 7 * * *'
+  # Allows manual trigger
+  workflow_dispatch:
+
+jobs:
+  generate-content:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Generate content
+      id: generate
+      env:
+        NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        echo "🚀 Iniciando geração de conteúdo..."
+        npm run content:generate
+        
+        # Contar novos arquivos gerados
+        NEW_FILES=$(find src/content -name "*.mdx" -newer .git/FETCH_HEAD 2>/dev/null | wc -l || echo "0")
+        echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
+        
+        if [ $NEW_FILES -gt 0 ]; then
+          echo "✅ Gerados $NEW_FILES novos artigos"
+          echo "success=true" >> $GITHUB_OUTPUT
+        else
+          echo "ℹ️ Nenhum artigo novo gerado"
+          echo "success=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Commit and push changes
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add src/content/
+        git commit -m "🤖 Daily content update - $(date +'%Y-%m-%d')"
+        git push
+
+    - name: Run health check
+      id: health
+      run: |
+        echo "🔍 Executando verificação de saúde..."
+        npm run health:check
+        echo "health_passed=true" >> $GITHUB_OUTPUT
+      continue-on-error: true
+
+    - name: 📱 Notify Slack - Success
+      if: success() && steps.generate.outputs.success == 'true'
+      run: |
+        if [ ! -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "channel": "#ireland-ednews",
+              "username": "Ireland EdNews Bot",
+              "icon_emoji": ":ireland:",
+              "attachments": [{
+                "color": "good",
+                "title": "✅ Geração de Conteúdo Diária Concluída!",
+                "fields": [
+                  {
+                    "title": "📊 Novos Artigos",
+                    "value": "${{ steps.generate.outputs.new_files }}",
+                    "short": true
+                  },
+                  {
+                    "title": "📅 Data",
+                    "value": "'$(date +'%d/%m/%Y às %H:%M UTC')'",
+                    "short": true
+                  },
+                  {
+                    "title": "🔗 Ver Site",
+                    "value": "<https://ireland-ednews.vercel.app|ireland-ednews.vercel.app>",
+                    "short": false
+                  }
+                ],
+                "footer": "Ireland EdNews",
+                "ts": '$(date +%s)'
+              }]
+            }' \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
+        fi
+
+    - name: 📱 Notify Slack - Failure
+      if: failure()
+      run: |
+        if [ ! -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "channel": "#ireland-ednews",
+              "username": "Ireland EdNews Bot",
+              "icon_emoji": ":warning:",
+              "attachments": [{
+                "color": "danger",
+                "title": "❌ Falha na Geração de Conteúdo",
+                "fields": [
+                  {
+                    "title": "📅 Data",
+                    "value": "'$(date +'%d/%m/%Y às %H:%M UTC')'",
+                    "short": true
+                  },
+                  {
+                    "title": "🔧 Ação Necessária",
+                    "value": "Verificar logs e configurações",
+                    "short": true
+                  },
+                  {
+                    "title": "🔗 Ver Logs",
+                    "value": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|Ver detalhes do erro>",
+                    "short": false
+                  }
+                ],
+                "footer": "Ireland EdNews",
+                "ts": '$(date +%s)'
+              }]
+            }' \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
+        fi
+
+    - name: 📱 Notify Slack - No Content
+      if: success() && steps.generate.outputs.success == 'false'
+      run: |
+        if [ ! -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{
+              "channel": "#ireland-ednews",
+              "username": "Ireland EdNews Bot",
+              "icon_emoji": ":information_source:",
+              "attachments": [{
+                "color": "warning",
+                "title": "ℹ️ Nenhum Conteúdo Novo Hoje",
+                "fields": [
+                  {
+                    "title": "📅 Data",
+                    "value": "'$(date +'%d/%m/%Y às %H:%M UTC')'",
+                    "short": true
+                  },
+                  {
+                    "title": "🔍 Possíveis Causas",
+                    "value": "• Sem notícias relevantes\n• Limite de API atingido\n• Filtros restritivos",
+                    "short": false
+                  }
+                ],
+                "footer": "Ireland EdNews",
+                "ts": '$(date +%s)'
+              }]
+            }' \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
+        fi
