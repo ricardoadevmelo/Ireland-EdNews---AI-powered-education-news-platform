@@ -26,7 +26,7 @@ Environment: All (Production, Preview, Development)
 
 # ===== GOOGLE SEARCH CONSOLE =====
 Name: NEXT_PUBLIC_GOOGLE_VERIFICATION
-Value: your-verification-code-here
+Value: aOMygxpqXICJ13sf-PHKksjI7FT7Ci0C0wBOjiLZKRU
 Environment: All (Production, Preview, Development)
 
 # 3. Após adicionar todas as variáveis, clique "Redeploy" na aba "Deployments"
