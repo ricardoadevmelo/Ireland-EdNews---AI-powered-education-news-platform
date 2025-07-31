@@ -3,6 +3,10 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
+import GoogleAnalytics from './components/GoogleAnalytics';
+import GoogleAdSense from './components/GoogleAdSense';
+import StructuredData from './components/StructuredData';
+import { generateSEOMetadata } from './lib/seo';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,7 +16,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Ireland EdNews - Educação e Aprendizagem Online",
   description: "Portal de notícias focado em educação e aprendizagem online na Irlanda. Conteúdo inteligente com IA.",
-  keywords: "educação irlanda, universidades irlandesas, cursos online, estudar na irlanda, educação superior",
+  keywords: "educação irlanda, universidades irlandesas, cursos online, estudar na irlanda, educação superior, trinity college dublin, ucd, cork university",
   authors: [{ name: "Ireland EdNews Team" }],
   openGraph: {
     title: "Ireland EdNews - Educação na Irlanda",
@@ -26,6 +30,20 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Ireland EdNews",
     description: "Notícias educacionais da Irlanda com IA",
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || "add-your-google-verification-code",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
@@ -79,6 +97,20 @@ export default function RootLayout({
           {children}
         </main>
         
+        {/* Google Analytics */}
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <GoogleAnalytics GA_MEASUREMENT_ID={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />
+        )}
+        
+        {/* Google AdSense */}
+        {process.env.NEXT_PUBLIC_ADSENSE_ID && (
+          <GoogleAdSense ADSENSE_ID={process.env.NEXT_PUBLIC_ADSENSE_ID} />
+        )}
+        
+        {/* Structured Data for SEO */}
+        <StructuredData />
+        
+        {/* Vercel Analytics */}
         <Analytics />
       </body>
     </html>
