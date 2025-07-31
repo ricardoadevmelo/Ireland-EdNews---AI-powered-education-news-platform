@@ -1,6 +1,9 @@
 "use client";
 import { useState, useEffect } from 'react';
 import LegalDisclaimer from './components/LegalDisclaimer';
+import AffiliateShowcase from './components/AffiliateShowcase';
+import NewsletterPremium from './components/NewsletterPremium';
+import JobBoard from './components/JobBoard';
 
 export default function HomePage() {
   const [stats, setStats] = useState({ subscribers: 0, articles: 0, views: 0 });
@@ -145,6 +148,15 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Affiliate Products Section */}
+      <AffiliateShowcase limit={3} />
+
+      {/* Job Board Section */}
+      <JobBoard featured limit={2} />
+
+      {/* Premium Newsletter Section */}
+      <NewsletterPremium />
 
       {/* Newsletter Section */}
       <section className="py-20 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 text-white">
