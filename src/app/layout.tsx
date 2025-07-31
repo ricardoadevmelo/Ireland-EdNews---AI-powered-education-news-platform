@@ -5,6 +5,7 @@ import "./globals.css";
 import { Analytics } from '@vercel/analytics/next';
 import GoogleAnalytics from './components/GoogleAnalytics';
 import GoogleAdSense from './components/GoogleAdSense';
+import GoogleSearchConsole from './components/GoogleSearchConsole';
 import StructuredData from './components/StructuredData';
 import { generateSEOMetadata } from './lib/seo';
 
@@ -55,6 +56,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
+        <GoogleSearchConsole verificationCode={process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION} />
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇮🇪</text></svg>" />
       </head>
       <body className={`${inter.variable} antialiased`}>
